@@ -93,7 +93,7 @@ public class GetWundergroundData {
 						dataCollectionStatus++;
 						windspeed = line.substring(line.indexOf("wx-value") + 10, line.indexOf("</span>"));
 						System.out.println("Wind speed: " + windspeed + " mph");
-					} else if (line.contains("<td >") && line.contains("</td>") && dataCollectionStatus == 6) {
+					} else if (line.contains("<td >") && line.contains("</td>") && dataCollectionStatus == 6 && !line.contains("N/A")) {
 						dataCollectionStatus = 0;
 						generalDescription = line.substring(line.indexOf("<td >") + 5, line.indexOf("</td>"));
 						System.out.println("General description: " + generalDescription);
