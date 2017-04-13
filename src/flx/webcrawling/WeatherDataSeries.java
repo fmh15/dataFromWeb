@@ -3,14 +3,14 @@ package flx.webcrawling;
 import java.util.Date;
 
 public class WeatherDataSeries {
-	Date timestamp;
-	double temperature;
-	int humidity;
-	double pressure;
-	double sight;
-	double windspeed;
-	String winddirection;
-	String generalDescription;
+	private Date timestamp;
+	private double temperature;
+	private int humidity;
+	private double pressure;
+	private double sight;
+	private double windspeed;
+	private String winddirection;
+	private String generalDescription;
 	
 	
 	

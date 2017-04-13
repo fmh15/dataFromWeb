@@ -1,5 +1,8 @@
 package flx.webcrawling;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,6 +79,42 @@ public class WeatherStation {
 		return GetWundergroundData.wundergroundURL[0] + ICAO + formattedDate + GetWundergroundData.wundergroundURL[1]
 				+ cityName + GetWundergroundData.wundergroundURL[2] + country + GetWundergroundData.wundergroundURL[3]
 				+ wmo;
+	}
+	
+	@SuppressWarnings("deprecation")
+	public void writeStationDataToCSV() {
+		
+		 PrintWriter pw;
+		try {
+			pw = new PrintWriter(new File(cityName + GetWundergroundData.startDate.toLocaleString() + "-" + GetWundergroundData.endDate.toLocaleString() +".csv"));
+			StringBuilder sb = new StringBuilder();
+			
+			for (WeatherDataSeries wd: weatherData){
+				sb.append(wd.getTimestamp());
+				sb.append(',');
+				sb.append(wd.getTemperature());
+				sb.append(',');
+				sb.append(wd.getPressure());
+				sb.append(',');
+				sb.append(wd.getSight());
+				sb.append(',');
+				sb.append(wd.getHumidity());
+				sb.append(',');
+				sb.append(wd.getWinddirection());
+				sb.append(',');
+				sb.append(wd.getWindspeed());
+				sb.append(',');
+				sb.append(wd.getGeneralDescription());
+				sb.append('\n');
+			}
+	        pw.write(sb.toString());
+	        pw.close();
+	        System.out.println("done!");
+		} catch (FileNotFoundException e) {
+			System.err.println("error while writing " + cityName + " data.");
+		}
+	        
+		
 	}
 
 }

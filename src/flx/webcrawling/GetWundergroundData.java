@@ -14,24 +14,24 @@ import java.util.Date;
 public class GetWundergroundData {
 
 	@SuppressWarnings("deprecation")
-	public static Date startDate = new Date(2015,1,1);
+	public static Date startDate = new Date(2015, 1, 1);
 	@SuppressWarnings("deprecation")
-	public static Date endDate = new Date(2016,12,31);
-	
-	final static String csvFile = "/Users/mkyong/csv/country.csv";
-	
+	public static Date endDate = new Date(2015, 1, 2);
+
+	final static String csvFile = "U:/Documents/stationMasterdata.csv";
+
 	public static final String[] wundergroundURL = { "https://www.wunderground.com/history/airport/",
 			"DailyHistory.html?req_city=", "&req_state=&req_statename=", "&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=" };
 
-	public static ArrayList <WeatherStation> listOfStations;
-	
+	public static ArrayList<WeatherStation> listOfStations;
+
 	public static void readFromWeb(String webURL) throws IOException {
 		URL url = new URL(webURL);
 		InputStream is = url.openStream();
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 			String line;
 			while ((line = br.readLine()) != null) {
-				System.out.println(line);
+//				System.out.println(line);
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -46,22 +46,21 @@ public class GetWundergroundData {
 	public static void main(String[] args) throws IOException {
 		listOfStations = new ArrayList<WeatherStation>();
 		readStationInfoFromCSV();
-		
-		
-		for (WeatherStation s : listOfStations){
-			// TODO
+
+		for (WeatherStation s : listOfStations) {
+			Date currentDate = startDate;
+			while (currentDate.compareTo(endDate) <= 0) {
+				readFromWeb(s.getURLFromStationForDate(currentDate));
+				currentDate.setTime(currentDate.getTime()+24*60*60*1000);
+			}
+			s.writeStationDataToCSV();
 		}
-		
-		
-		
-		
-		readFromWeb("");
 	}
-	
+
 	
 
 	private static void readStationInfoFromCSV() {
-		
+
 		BufferedReader br = null;
 		String line = "";
 		final String cvsSplitBy = ",";
