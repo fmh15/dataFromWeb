@@ -73,7 +73,7 @@ public class WeatherStation {
 
 	public String getURLFromStationForDate(Date date) {
 		
-		SimpleDateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd");
+		SimpleDateFormat formatter = new SimpleDateFormat("/20yy/M/d/");
 		String formattedDate = formatter.format(date);
 		
 		return GetWundergroundData.wundergroundURL[0] + ICAO + formattedDate + GetWundergroundData.wundergroundURL[1]

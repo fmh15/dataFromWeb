@@ -26,31 +26,83 @@ public class GetWundergroundData {
 	public static ArrayList<WeatherStation> listOfStations;
 
 	public static void readFromWeb(String webURL, boolean isFirstDay, WeatherStation station) throws IOException {
+		System.out.println(webURL);
+
 		URL url = new URL(webURL);
 		InputStream is = url.openStream();
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 			String line;
 			boolean isListening = false;
-			
-			
+			int dataCollectionStatus = 0;
+
 			while ((line = br.readLine()) != null) {
-				
+				String time;
+				String temperature;
+				String humidity;
+				String pressure;
+				String sight;
+				String windspeed;
+				String winddirection;
+				String generalDescription;
+
 				// read geographical information of station
-				if (line.contains("TheLat=")){
-					if (isFirstDay){
+				if (line.contains("TheLat=")) {
+					if (isFirstDay) {
 						isFirstDay = false;
-						String lat = line.substring(line.indexOf("TheLat=")+7, line.indexOf("TheLat=")+13);
-						String lon = line.substring(line.indexOf("TheLon=")+7, line.indexOf("TheLon=")+13);
+						String lat = line.substring(line.indexOf("TheLat=") + 7, line.indexOf("TheLat=") + 13);
+						String lon = line.substring(line.indexOf("TheLon=") + 7, line.indexOf("TheLon=") + 13);
 						station.setLat(Double.parseDouble(lat));
 						station.setLon(Double.parseDouble(lon));
 					}
 					isListening = true;
 				}
-				
-				
-				
+
+				if (isListening) {
+					if (line.contains(":")) {
+						dataCollectionStatus++;
+						time = line.substring(line.indexOf(":") - 2, line.indexOf(":"));
+						if (time.contains(">")) {
+							time = "" + time.charAt(1);
+						}
+						String ampm = line.substring(line.indexOf(":") + 4, line.indexOf(":") + 6);
+
+						System.out.println(time + " " + ampm);
+					} else
+
+					if (dataCollectionStatus == 1 && line.contains("wx-value")) {
+						dataCollectionStatus++;
+						temperature = line.substring(line.indexOf("wx-value") + 10, line.indexOf("</span>"));
+						System.out.println("Temperature: " + temperature + " F");
+					} else if (line.contains("%")) {
+						dataCollectionStatus++;
+						humidity = line.substring(line.indexOf("%") - 2, line.indexOf("%"));
+						System.out.println("Humidity: " + humidity + "%");
+					} else if (dataCollectionStatus == 3 && line.contains("wx-value")) {
+						dataCollectionStatus++;
+						pressure = line.substring(line.indexOf("wx-value") + 10, line.indexOf("</span>"));
+						System.out.println("Pressure: " + pressure + " inch");
+//					} else if (line.contains("&nbsp;mi")) {
+//						dataCollectionStatus++;
+//						sight = line.substring(line.indexOf("wx-value") + 10, line.indexOf("</span>"));
+//						System.out.println("Sight: " + sight + " mi");
+					} else if (line.contains("<td >") && line.contains("</td>") && dataCollectionStatus == 4) {
+						dataCollectionStatus++;
+						winddirection = line.substring(line.indexOf("<td >") + 5, line.indexOf("</td>"));
+						System.out.println("Wind direction: " + winddirection);
+					} else if (line.contains("mph")) {
+						dataCollectionStatus++;
+						windspeed = line.substring(line.indexOf("wx-value") + 10, line.indexOf("</span>"));
+						System.out.println("Wind speed: " + windspeed + " mph");
+					} else if (line.contains("<td >") && line.contains("</td>") && dataCollectionStatus == 6) {
+						dataCollectionStatus = 0;
+						generalDescription = line.substring(line.indexOf("<td >") + 5, line.indexOf("</td>"));
+						System.out.println("General description: " + generalDescription);
+						System.out.println();
+					}
+				}
+
 				// end reading after this line, all data collected
-				if (isListening && line.contains("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")){
+				if (isListening && line.contains("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")) {
 					break;
 				}
 			}
@@ -76,7 +128,8 @@ public class GetWundergroundData {
 				try {
 					readFromWeb(s.getURLFromStationForDate(currentDate), currentDate == startDate, s);
 				} catch (IOException e) {
-					System.err.println("error while crawling " + s.getCityName() + " data of: " + currentDate.toLocaleString());
+					System.err.println(
+							"error while crawling " + s.getCityName() + " data of: " + currentDate.toLocaleString());
 				}
 
 				currentDate.setTime(currentDate.getTime() + 24 * 60 * 60 * 1000);
