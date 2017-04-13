@@ -89,6 +89,8 @@ public class WeatherStation {
 			pw = new PrintWriter(new File(cityName + GetWundergroundData.startDate.toLocaleString() + "-" + GetWundergroundData.endDate.toLocaleString() +".csv"));
 			StringBuilder sb = new StringBuilder();
 			
+			
+			
 			for (WeatherDataSeries wd: weatherData){
 				sb.append(wd.getTimestamp());
 				sb.append(',');

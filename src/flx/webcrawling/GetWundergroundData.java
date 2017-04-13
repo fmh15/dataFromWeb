@@ -25,13 +25,34 @@ public class GetWundergroundData {
 
 	public static ArrayList<WeatherStation> listOfStations;
 
-	public static void readFromWeb(String webURL) throws IOException {
+	public static void readFromWeb(String webURL, boolean isFirstDay, WeatherStation station) throws IOException {
 		URL url = new URL(webURL);
 		InputStream is = url.openStream();
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 			String line;
+			boolean isListening = false;
+			
+			
 			while ((line = br.readLine()) != null) {
-//				System.out.println(line);
+				
+				// read geographical information of station
+				if (line.contains("TheLat=")){
+					if (isFirstDay){
+						isFirstDay = false;
+						String lat = line.substring(line.indexOf("TheLat=")+7, line.indexOf("TheLat=")+13);
+						String lon = line.substring(line.indexOf("TheLon=")+7, line.indexOf("TheLon=")+13);
+						station.setLat(Double.parseDouble(lat));
+						station.setLon(Double.parseDouble(lon));
+					}
+					isListening = true;
+				}
+				
+				
+				
+				// end reading after this line, all data collected
+				if (isListening && line.contains("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890")){
+					break;
+				}
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -43,21 +64,26 @@ public class GetWundergroundData {
 
 	}
 
-	public static void main(String[] args) throws IOException {
+	@SuppressWarnings("deprecation")
+	public static void main(String[] args) {
 		listOfStations = new ArrayList<WeatherStation>();
 		readStationInfoFromCSV();
 
 		for (WeatherStation s : listOfStations) {
 			Date currentDate = startDate;
 			while (currentDate.compareTo(endDate) <= 0) {
-				readFromWeb(s.getURLFromStationForDate(currentDate));
-				currentDate.setTime(currentDate.getTime()+24*60*60*1000);
+
+				try {
+					readFromWeb(s.getURLFromStationForDate(currentDate), currentDate == startDate, s);
+				} catch (IOException e) {
+					System.err.println("error while crawling " + s.getCityName() + " data of: " + currentDate.toLocaleString());
+				}
+
+				currentDate.setTime(currentDate.getTime() + 24 * 60 * 60 * 1000);
 			}
 			s.writeStationDataToCSV();
 		}
 	}
-
-	
 
 	private static void readStationInfoFromCSV() {
 
